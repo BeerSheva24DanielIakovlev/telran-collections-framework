@@ -2,6 +2,7 @@ package telran.util;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class ArrayList<T> implements List<T> {
     private static final int DEFAULT_CAPACITY = 16;
@@ -27,8 +28,13 @@ public class ArrayList<T> implements List<T> {
     }
     @Override
     public boolean remove(T pattern) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'remove'");
+        int index = indexOf(pattern);
+        boolean res = false;
+        if (index >= 0) {
+            remove(index);
+            res = true;
+        }
+        return res;
     }
 
     @Override
@@ -38,8 +44,7 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public boolean isEmpty() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isEmpty'");
+        return size == 0;
     }
 
     @Override
@@ -49,38 +54,82 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public Iterator<T> iterator() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'iterator'");
+        return new Iterator<T>() {
+            private int currentIndex = 0;
+
+            @Override
+            public boolean hasNext() {
+                return currentIndex < size;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return (T) array[currentIndex++];
+            }
+        };
     }
 
     @Override
     public void add(int index, T obj) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'add'");
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (size == array.length) {
+            reallocate();
+        }
+        System.arraycopy(array, index, array, index + 1, size - index);
+        array[index] = obj;
+        size++;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T remove(int index) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'remove'");
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
+        T removedElement = (T) array[index];
+        int numMoved = size - index - 1;
+        if (numMoved > 0) {
+            System.arraycopy(array, index + 1, array, index, numMoved);
+        }
+        array[--size] = null; 
+        return removedElement;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T get(int index) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'get'");
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
+        return (T) array[index];
     }
 
     @Override
     public int indexOf(T pattern) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'indexOf'");
+        int res = -1;
+        for (int i = 0; i < size; i++) {
+            if (array[i].equals(pattern)) {
+                res = i;
+            }
+        }
+        return res;
     }
 
     @Override
     public int lastIndexOf(T pattern) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'lastIndexOf'");
+        int res = -1;
+        for (int i = size - 1; i >= 0; i--) {
+            if (array[i].equals(pattern)) {
+                res = i;
+            }
+        }
+        return res;
     }
 
 }
