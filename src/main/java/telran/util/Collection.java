@@ -9,9 +9,9 @@ public interface Collection<T> extends Iterable<T> {
     default boolean removeIf(Predicate<T> predicate) {
         int oldSize = size();
         Iterator<T> it = iterator();
-        while (it.hasNext()) {
+        while(it.hasNext()) {
             T obj = it.next();
-            if (predicate.test(obj)) {
+            if(predicate.test(obj)) {
                 it.remove();
             }
         }

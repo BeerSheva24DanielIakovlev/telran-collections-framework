@@ -30,12 +30,20 @@ public class LinkedList<T> implements List<T> {
             current = current.next;
             return res;
         }
-
-        @Override
-        public void remove () {
-            //TODO
-        }
         
+        @Override
+        public void remove(){
+            if(current == null) {
+                throw new NoSuchElementException();
+            }
+
+            if (current != tail) {
+                current.next = current;
+            } else {
+                current = null;
+                current.prev = tail;
+            }
+        }   
     }
 
     Node<T> head;

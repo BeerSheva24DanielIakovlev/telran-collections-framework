@@ -10,6 +10,7 @@ public class ArrayList<T> implements List<T> {
     private static final int DEFAULT_CAPACITY = 16;
     private Object [] array;
     private int size = 0;
+    
     public ArrayList(int capacity) {
         array = new Object[capacity];
     }
@@ -31,6 +32,7 @@ public class ArrayList<T> implements List<T> {
     private void reallocate() {
           array = Arrays.copyOf(array, array.length * 2);
     }
+   
 
     @Override
     public int size() {
@@ -41,6 +43,8 @@ public class ArrayList<T> implements List<T> {
     public boolean isEmpty() {
         return size == 0;
     }
+
+   
 
     @Override
     public Iterator<T> iterator() {
@@ -56,12 +60,14 @@ public class ArrayList<T> implements List<T> {
         size++;
     }
 
+   
     @Override
     public T remove(int index) {
         checkIndex(index, false);
         T res = (T)array[index];
         size--;
         System.arraycopy(array, index + 1, array, index, size - index);
+        array[size] = null;
         return res;
     }
 
@@ -88,21 +94,34 @@ public class ArrayList<T> implements List<T> {
         }
         return index;
     }
-
     @Override
     public boolean removeIf(Predicate<T> predicate) {
-        //TODO
-        //algoreithm complexity O[N]
-        //hint: two indices and going throught one array
-        return false;
+        boolean res = false;
+        int writeIndex = 0;
+        
+        for (int readIndex = 0; readIndex < size; readIndex++) {
+            T element = (T) array[readIndex];
+            if (!predicate.test(element)) {
+                array[writeIndex++] = element;
+            } else {
+                res = true;
+            }
+        }
+        for (int i = writeIndex; i < size; i++) {
+            array[i] = null;
+        }
+    
+        size = writeIndex;
+        return res;
     }
+
 
     private class ArrayListIterator implements Iterator<T> {
         int currentIndex = 0;
-        private boolean flagNext = false;
+        private boolean flNext = false;
         @Override
         public boolean hasNext() {
-            flagNext = true;
+            flNext = true;
            return currentIndex < size;
         }
 
@@ -114,15 +133,15 @@ public class ArrayList<T> implements List<T> {
             }
             return (T) array[currentIndex++];
         }
-
         @Override
         public void remove() {
-            if (!flagNext) {
+            if(!flNext) {
                 throw new IllegalStateException();
             }
             ArrayList.this.remove(--currentIndex);
-            flagNext = false;
+            flNext = false;
         }
+
         
     }
 
