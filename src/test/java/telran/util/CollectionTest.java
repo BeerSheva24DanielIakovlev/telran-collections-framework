@@ -30,10 +30,14 @@ public abstract class CollectionTest {
         assertTrue(collection.isEmpty());
     }
     @Test
-    void addTest() {
+    void addNonExistingTest() {
         assertTrue(collection.add(200));
+        runTest(new Integer[]{3, -10, 20, 1, 10, 8, 100 , 17, 200});
+    }
+    @Test
+    void addExisingtTest() {
         assertTrue(collection.add(17));
-        runTest(new Integer[]{3, -10, 20, 1, 10, 8, 100 , 17, 200, 17});
+        runTest(new Integer[]{3, -10, 20, 1, 10, 8, 100 , 17, 17});
     }
     @Test
     void sizeTest() {
@@ -107,7 +111,9 @@ public abstract class CollectionTest {
         collection.clear();
         IntStream.range(0, N_ELEMENTS).forEach(i -> collection.add(random.nextInt()));
         collection.clear();
-
+        assertTrue(collection.stream().allMatch(n -> n % 2 != 0));
+        collection.clear();
+        assertTrue(collection.isEmpty());
     }
 
 }
