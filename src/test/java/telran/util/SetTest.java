@@ -24,7 +24,7 @@ public abstract class SetTest extends CollectionTest {
     @Test
     void getPatternTest() {
         assertEquals(-10, set.get(-10));
-        assertNull(array);
+        assertNull(set.get(1000000));
     }
 
 }

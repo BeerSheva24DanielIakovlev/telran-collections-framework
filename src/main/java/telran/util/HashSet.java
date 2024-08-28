@@ -1,7 +1,7 @@
 package telran.util;
 
-import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 @SuppressWarnings("unchecked")
 public class HashSet<T> implements Set<T> {
@@ -18,22 +18,34 @@ public class HashSet<T> implements Set<T> {
 
         @Override
         public boolean hasNext() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'hasNext'");
+            while (currentIterator == null || !currentIterator.hasNext()) {
+                if (indexIterator >= hashTable.length) {
+                    return false;
+                }
+                currentIterator = hashTable[indexIterator++] != null ? hashTable[indexIterator - 1].iterator() : null;
+            }
+            return currentIterator != null && currentIterator.hasNext();
         }
+        
 
         @Override
         public T next() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'next'");
+             if(!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            prevIterator = currentIterator;
+            return currentIterator.next();
         }
 
         @Override
         public void remove() {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'буэээ'");
-        }
-        
+            if (prevIterator == null) {
+                throw new IllegalStateException();
+            }
+            prevIterator.remove();
+            prevIterator = null;
+            size--;
+        }   
     }
 
     public HashSet(int hashTableLength, float factor) {
@@ -69,6 +81,8 @@ public class HashSet<T> implements Set<T> {
         }
         
         list.add(obj);
+        table[index] = list; 
+
     }
 
     private int getIndex(T obj, int length) {
@@ -91,8 +105,23 @@ public class HashSet<T> implements Set<T> {
 
     @Override
     public boolean remove(T pattern) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'remove'");
+        boolean res = false;
+
+        if (contains(pattern)) {
+            removeObjInHashTable(pattern, hashTable);
+            
+            res = true;
+            size--;
+        }
+
+        return res;
+    }
+
+    private void removeObjInHashTable(T pattern, List<T>[] table) {
+        int index = getIndex(pattern, table.length);
+        List<T> list = table[index];
+        list.remove(pattern);
+        table[index] = list; 
     }
 
     @Override
@@ -107,7 +136,7 @@ public class HashSet<T> implements Set<T> {
 
     @Override
     public boolean contains(T pattern) {
-        int index = getIndex(pattern, hashTable.length);
+        int index = getIndex(pattern, hashTable.length); 
         List<T> list = hashTable[index];
 
         return list != null && list.contains(pattern);
@@ -120,8 +149,22 @@ public class HashSet<T> implements Set<T> {
 
     @Override
     public T get(Object pattern) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'get'");
+        T res = null;
+        int index = getIndex((T) pattern, hashTable.length);
+        List<T> list = hashTable[index];
+
+        if (list != null) {
+            Iterator<T> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                T element = iterator.next();
+                if (element.equals(pattern)) {
+                    res = element; 
+                    break; 
+                }
+            }
+        }
+        return res;
     }
+    
 
 }

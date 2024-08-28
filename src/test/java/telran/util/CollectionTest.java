@@ -54,7 +54,7 @@ public abstract class CollectionTest {
         }
         
         assertArrayEquals(array, actual);
-        assertThrowsExactly(NoSuchElementException.class, it::next );
+        assertThrowsExactly(NoSuchElementException.class, it::next);
     }
     @Test
     void removeInIteratorTest(){
