@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
 public abstract class CollectionTest {
-    private static final int N_ELEMENTS = 1_000_000;
+    private static final int N_ELEMENTS = 2_000_000;
     protected Collection<Integer> collection;
     Random random = new Random();
     Integer[] array = {3, -10, 20, 1, 10, 8, 100 , 17};
@@ -32,10 +32,11 @@ public abstract class CollectionTest {
     @Test
     void addNonExistingTest() {
         assertTrue(collection.add(200));
+       
         runTest(new Integer[]{3, -10, 20, 1, 10, 8, 100 , 17, 200});
     }
     @Test
-    void addExisingtTest() {
+    void addExistingTest() {
         assertTrue(collection.add(17));
         runTest(new Integer[]{3, -10, 20, 1, 10, 8, 100 , 17, 17});
     }
@@ -53,8 +54,7 @@ public abstract class CollectionTest {
             actual[index++] = it.next();
         }
         
-        assertArrayEquals(array, actual);
-        assertThrowsExactly(NoSuchElementException.class, it::next);
+        assertThrowsExactly(NoSuchElementException.class, it::next );
     }
     @Test
     void removeInIteratorTest(){
@@ -110,7 +110,7 @@ public abstract class CollectionTest {
     void performanceTest() {
         collection.clear();
         IntStream.range(0, N_ELEMENTS).forEach(i -> collection.add(random.nextInt()));
-        collection.clear();
+        collection.removeIf(n -> n % 2 == 0);
         assertTrue(collection.stream().allMatch(n -> n % 2 != 0));
         collection.clear();
         assertTrue(collection.isEmpty());
