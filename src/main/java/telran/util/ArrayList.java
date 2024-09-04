@@ -96,32 +96,26 @@ public class ArrayList<T> implements List<T> {
     }
     @Override
     public boolean removeIf(Predicate<T> predicate) {
-        boolean res = false;
-        int writeIndex = 0;
-        
-        for (int readIndex = 0; readIndex < size; readIndex++) {
-            T element = (T) array[readIndex];
-            if (!predicate.test(element)) {
-                array[writeIndex++] = element;
-            } else {
-                res = true;
+       int indexTo = 0;
+       Predicate<T> negPred = predicate.negate(); //not to apply "!" operator at each iteration
+       for(int currentIndex = 0; currentIndex < size; currentIndex++) {
+        T current = (T)array[currentIndex];
+            if(negPred.test(current)) {
+                array[indexTo++] = current;
             }
-        }
-        for (int i = writeIndex; i < size; i++) {
-            array[i] = null;
-        }
-    
-        size = writeIndex;
-        return res;
+       }
+       Arrays.fill(array,indexTo, size, null);
+       boolean res = indexTo < size;
+       size = indexTo;
+       return res;
     }
-
 
     private class ArrayListIterator implements Iterator<T> {
         int currentIndex = 0;
         private boolean flNext = false;
         @Override
         public boolean hasNext() {
-            flNext = true;
+           
            return currentIndex < size;
         }
 
@@ -131,6 +125,7 @@ public class ArrayList<T> implements List<T> {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
+            flNext = true;
             return (T) array[currentIndex++];
         }
         @Override

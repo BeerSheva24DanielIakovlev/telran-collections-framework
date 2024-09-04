@@ -10,42 +10,59 @@ public class HashSet<T> implements Set<T> {
     List<T>[] hashTable;
     float factor;
     int size;
-    
     private class HashSetIterator implements Iterator<T> {
-        Iterator<T> currentIterator;
-        Iterator<T> prevIterator;
-        int indexIterator;
+       Iterator<T> iterator;
+		Iterator<T> prevIterator;
+		int iteratorIndex;
 
-        @Override
-        public boolean hasNext() {
-            while (currentIterator == null || !currentIterator.hasNext()) {
-                if (indexIterator >= hashTable.length) {
-                    return false;
-                }
-                currentIterator = hashTable[indexIterator++] != null ? hashTable[indexIterator - 1].iterator() : null;
-            }
-            return currentIterator != null && currentIterator.hasNext();
-        }
-        
+		HashSetIterator() {
+			iteratorIndex = 0;
+			iterator = getIterator(0);
+			setIteratorIndex();
+		}
 
-        @Override
-        public T next() {
-             if(!hasNext()) {
-                throw new NoSuchElementException();
-            }
-            prevIterator = currentIterator;
-            return currentIterator.next();
-        }
+		private Iterator<T> getIterator(int index) {
+			List<T> list = hashTable[index];
+			return list == null ? null : list.iterator();
+		}
 
-        @Override
-        public void remove() {
-            if (prevIterator == null) {
-                throw new IllegalStateException();
-            }
-            prevIterator.remove();
-            prevIterator = null;
-            size--;
-        }   
+		@Override
+		public boolean hasNext() {
+
+			return iterator != null;
+		}
+
+		@Override
+		public T next() {
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+			prevIterator = iterator;
+			T res = iterator.next();
+			setIteratorIndex();
+			return res;
+		}
+
+		private void setIteratorIndex() {
+            int limit = hashTable.length - 1;
+			while (iteratorIndex < limit && (iterator == null || !iterator.hasNext())) {
+                iterator = getIterator(++iteratorIndex);
+			}
+            if (iteratorIndex == limit && (hashTable[iteratorIndex] == null || !iterator.hasNext())) {
+				iterator = null;
+			}
+			
+		}
+		@Override
+		public void remove() {
+			if(prevIterator == null) {
+				throw new IllegalStateException();
+			}
+			prevIterator.remove();
+			size--;
+			prevIterator = null;
+		}
+
     }
 
     public HashSet(int hashTableLength, float factor) {
@@ -62,15 +79,15 @@ public class HashSet<T> implements Set<T> {
         boolean res = false;
         if (!contains(obj)) {
             res = true;
-            if(size >= hashTable.length * factor) {
-                hashTableRealocation();
+            if (size >= hashTable.length * factor) {
+                hashTableReallocation();
             }
 
             addObjInHashTable(obj, hashTable);
             size++;
         }
-        
         return res;
+
     }
 
     private void addObjInHashTable(T obj, List<T>[] table) {
@@ -78,50 +95,40 @@ public class HashSet<T> implements Set<T> {
         List<T> list = table[index];
         if (list == null) {
             list = new ArrayList<>(3);
+            table[index] = list;
         }
-        
         list.add(obj);
-        table[index] = list; 
-
     }
 
     private int getIndex(T obj, int length) {
         int hashCode = obj.hashCode();
-
         return Math.abs(hashCode % length);
     }
 
-    private void hashTableRealocation() {
-        List<T>[]tempTable = new List[hashTable.length * 2];
-
-        for(List<T> list : hashTable) {
-            if (list != null) {
-                list.forEach(obj -> addObjInHashTable(obj, tempTable));
-                list.clear(); //??? for testing (if it does not work -> remove this statement)
-            }
+    private void hashTableReallocation() {
+       List<T> []tempTable = new List[hashTable.length * 2];
+       for(List<T> list: hashTable) {
+        if(list != null) {
+            list.forEach(obj -> addObjInHashTable(obj, tempTable));
+            list.clear(); 
         }
-        hashTable = tempTable;
+       }
+       hashTable = tempTable;
+
     }
 
     @Override
     public boolean remove(T pattern) {
-        boolean res = false;
-
-        if (contains(pattern)) {
-            removeObjInHashTable(pattern, hashTable);
-            
-            res = true;
-            size--;
-        }
-
-        return res;
-    }
-
-    private void removeObjInHashTable(T pattern, List<T>[] table) {
-        int index = getIndex(pattern, table.length);
-        List<T> list = table[index];
-        list.remove(pattern);
-        table[index] = list; 
+        boolean res = contains(pattern);
+		if (res) {
+			int index = getIndex(pattern, hashTable.length);
+			hashTable[index].remove(pattern);
+			size--;
+            if(hashTable[index].isEmpty()) {
+                hashTable[index] = null;
+            }
+		}
+		return res;
     }
 
     @Override
@@ -131,14 +138,13 @@ public class HashSet<T> implements Set<T> {
 
     @Override
     public boolean isEmpty() {
-        return size == 0;
+       return size == 0;
     }
 
     @Override
     public boolean contains(T pattern) {
-        int index = getIndex(pattern, hashTable.length); 
+        int index = getIndex(pattern, hashTable.length);
         List<T> list = hashTable[index];
-
         return list != null && list.contains(pattern);
     }
 
@@ -150,21 +156,15 @@ public class HashSet<T> implements Set<T> {
     @Override
     public T get(Object pattern) {
         T res = null;
-        int index = getIndex((T) pattern, hashTable.length);
-        List<T> list = hashTable[index];
+        T tpattern = (T) pattern;
+		if (contains(tpattern)) {
+			int index = getIndex(tpattern, hashTable.length);
+			List<T> list = hashTable[index];
+			int indexInList = list.indexOf(tpattern);
+			res = list.get(indexInList);
 
-        if (list != null) {
-            Iterator<T> iterator = list.iterator();
-            while (iterator.hasNext()) {
-                T element = iterator.next();
-                if (element.equals(pattern)) {
-                    res = element; 
-                    break; 
-                }
-            }
-        }
-        return res;
+		}
+		return res;
     }
-    
 
 }
