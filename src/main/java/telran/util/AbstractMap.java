@@ -17,27 +17,50 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
 
     @Override
     public V put(K key, V value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'put'");
+
+        Entry<K, V> newEntry = new Entry<>(key, value);
+        Entry<K, V> existingEntry = set.get(newEntry);
+    
+        V oldValue = null;
+    
+        if (existingEntry != null) {
+            oldValue = existingEntry.getValue();
+            existingEntry.setValue(value);
+        } else {
+            set.add(newEntry);
+        }
+    
+        return oldValue;
+
     }
 
     @Override
     public boolean containsKey(Object key) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'containsKey'");
+        Entry<K, V> pattern = new Entry<>((K)key, null);
+        Entry<K, V> entry = set.get(pattern);
+
+        return entry != null;
     }
 
     @Override
     public boolean containsValue(Object value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'containsValue'");
+        boolean res = false;
+        for (Entry<K, V> entry : set) {
+            if (entry.getValue().equals(value)) {
+                res = true;
+            }
+        }
+
+        return res;
     }
 
     @Override
     public Set<K> keySet() {
         Set<K> keySet = getEmptyKeySet();
-        //TODO
-        return null;
+        for (Entry<K, V> entry : set) {    
+            keySet.add(entry.getKey());
+        }
+        return keySet;
     }
 
     @Override
@@ -47,8 +70,11 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
 
     @Override
     public Collection<V> values() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'values'");
+        Collection<V> valuesCollection = new ArrayList<>();
+        for (Entry<K, V> entry : set) {
+            valuesCollection.add(entry.getValue());
+        }
+    return valuesCollection;
     }
 
     @Override
