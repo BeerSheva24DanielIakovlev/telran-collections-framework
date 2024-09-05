@@ -1,4 +1,7 @@
 package telran.util;
+
+import java.util.Iterator;
+
 @SuppressWarnings("unchecked")
 public abstract class AbstractMap<K, V> implements Map<K, V> {
     protected Set<Entry<K, V>> set;
@@ -45,14 +48,17 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
     @Override
     public boolean containsValue(Object value) {
         boolean res = false;
-        for (Entry<K, V> entry : set) {
-            if (entry.getValue().equals(value)) {
+        Iterator<Entry<K, V>> iterator = set.iterator();
+        while (iterator.hasNext()) {
+            Entry<K, V> entry = iterator.next();
+            if ((value == null && entry.getValue() == null) || 
+                (value != null && value.equals(entry.getValue()))) {
                 res = true;
             }
         }
-
         return res;
     }
+    
 
     @Override
     public Set<K> keySet() {
