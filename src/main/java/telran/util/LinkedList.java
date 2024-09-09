@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class LinkedList<T> implements List<T> {
-    private static class Node<T> {
+    static class Node<T> {
         T obj;
         Node<T> next;
         Node<T> prev;
@@ -14,12 +14,9 @@ public class LinkedList<T> implements List<T> {
             this.obj = obj;
         }
     }
-    private class LinkedListIterator implements Iterator<T> {
+   class LinkedListIterator implements Iterator<T> {
         Node<T> current = head;
-        Node<T> res = null;
-        Node<T> prRes = null;
-        private boolean flag = false;
-
+        Node<T> prev = null;
         @Override
         public boolean hasNext() {
             return current != null;
@@ -30,36 +27,27 @@ public class LinkedList<T> implements List<T> {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
-            flag = true;
-            prRes = res;
-            res = current;
+            T res = current.obj;
+            prev = current;
             current = current.next;
-            return res.obj;
+            return res;
         }
-        
         @Override
         public void remove(){
-            if(!flag) {
-                throw new IllegalStateException();
-            }
-
-            if (res == head) {
-                head = current;
-            } else {
-                prRes.next = current;
-            }
-
-            size--;
-            flag = false;
-            res = prRes;
-        }   
+           if(prev == null) {
+            throw new IllegalStateException();
+           }
+           removeNode(prev);
+           prev = null;
+        }
+        
     }
 
     Node<T> head;
     Node<T> tail;
     int size = 0;
     
-    private Node<T> getNode(int index) {
+   Node<T> getNode(int index) {
         return index < size / 2 ? getNodeFromHead(index) : getNodeFromTail(index);
     }
 
@@ -79,7 +67,7 @@ public class LinkedList<T> implements List<T> {
         return current;
     }
 
-    private void addNode(Node<T> node, int index) {
+   void addNode(Node<T> node, int index) {
         if (index == 0) {
             addHead(node);
         } else if (index == size) {
@@ -156,7 +144,7 @@ public class LinkedList<T> implements List<T> {
         return res;
     }
 
-    private void removeNode(Node<T> toRemoveNode) {
+    void removeNode(Node<T> toRemoveNode) {
         if(toRemoveNode == head) {
             removeHead();
         } else if (toRemoveNode == tail) {

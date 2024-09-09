@@ -1,6 +1,6 @@
 package telran.util;
 
-import java.util.Iterator;
+import java.util.Objects;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractMap<K, V> implements Map<K, V> {
@@ -9,63 +9,50 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
     @Override
     public V get(Object key) {
         
-        Entry<K, V> pattern = new Entry<>((K)key, null);
-       Entry<K,V> entry = set.get(pattern);
+        Entry<K, V> entry = getEntry(key);
        V res = null;
        if (entry != null) {
         res = entry.getValue();
        }
        return res;
     }
+    private Entry<K, V> getEntry(Object key) {
+        Entry<K, V> pattern = getPattern(key);
+       Entry<K,V> entry = set.get(pattern);
+        return entry;
+    }
+    private Entry<K, V> getPattern(Object key) {
+        return new Entry<>((K)key, null);
+    }
 
     @Override
     public V put(K key, V value) {
-
-        Entry<K, V> newEntry = new Entry<>(key, value);
-        Entry<K, V> existingEntry = set.get(newEntry);
-    
-        V oldValue = null;
-    
-        if (existingEntry != null) {
-            oldValue = existingEntry.getValue();
-            existingEntry.setValue(value);
+        Entry<K, V> entry = getEntry(key);
+        V res = null;
+        if (entry != null) {
+            res = entry.getValue();
+            entry.setValue(value);
         } else {
-            set.add(newEntry);
+            set.add(new Entry<K, V>(key, value));
         }
-    
-        return oldValue;
-
+        return res;
     }
 
     @Override
     public boolean containsKey(Object key) {
-        Entry<K, V> pattern = new Entry<>((K)key, null);
-        Entry<K, V> entry = set.get(pattern);
-
+        Entry<K, V> entry = getEntry(key);
         return entry != null;
     }
 
     @Override
     public boolean containsValue(Object value) {
-        boolean res = false;
-        Iterator<Entry<K, V>> iterator = set.iterator();
-        while (iterator.hasNext()) {
-            Entry<K, V> entry = iterator.next();
-            if ((value == null && entry.getValue() == null) || 
-                (value != null && value.equals(entry.getValue()))) {
-                res = true;
-            }
-        }
-        return res;
+        return set.stream().anyMatch(e -> Objects.equals(e.getValue(),value));
     }
-    
 
     @Override
     public Set<K> keySet() {
         Set<K> keySet = getEmptyKeySet();
-        for (Entry<K, V> entry : set) {    
-            keySet.add(entry.getKey());
-        }
+        set.stream().map(Entry::getKey).forEach(keySet::add);
         return keySet;
     }
 
@@ -76,11 +63,9 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
 
     @Override
     public Collection<V> values() {
-        Collection<V> valuesCollection = new ArrayList<>();
-        for (Entry<K, V> entry : set) {
-            valuesCollection.add(entry.getValue());
-        }
-    return valuesCollection;
+        ArrayList<V> collection = new ArrayList<>(set.size());
+        set.stream().map(Entry::getValue).forEach(collection::add);
+        return collection;
     }
 
     @Override
@@ -91,6 +76,16 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
     @Override
     public boolean isEmpty() {
        return set.isEmpty();
+    }
+    @Override
+    public V remove (K key) {
+        Entry<K, V> entry = getEntry(key);
+        V res = null;
+        if (entry != null) {
+            set.remove(entry);
+            res = entry.getValue();
+        }
+        return res;
     }
 
 }
